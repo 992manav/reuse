@@ -1,0 +1,80 @@
+/* Header Component CSS */
+.header-container {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  height: 64px;
+}
+.header-logo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #38a169;
+  text-decoration: none;
+}
+.header-nav {
+  display: flex;
+  gap: 24px;
+}
+.header-link {
+  color: #2d3748;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.header-link:hover {
+  color: #38a169;
+}
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-points {
+  color: #718096;
+  font-size: 1rem;
+  margin-right: 8px;
+}
+.header-btn {
+  background: #edf2f7;
+  color: #2d3748;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.header-btn.green {
+  background: #38a169;
+  color: #fff;
+}
+.header-btn.blue {
+  background: #4299e1;
+  color: #fff;
+}
+.header-btn.red {
+  background: #e53e3e;
+  color: #fff;
+}
+.header-btn:hover {
+  background: #e2e8f0;
+  color: #38a169;
+}
+.header-btn.green:hover {
+  background: #2f855a;
+}
+.header-btn.blue:hover {
+  background: #2b6cb0;
+}
+.header-btn.red:hover {
+  background: #c53030;
+}
