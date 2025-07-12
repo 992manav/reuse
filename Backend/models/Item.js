@@ -23,6 +23,19 @@ const itemSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+
+    purchasePrice: { type: Number },
+    purchaseAge: {
+      type: String,
+      enum: [
+        "Less than 3 months",
+        "3–6 months",
+        "6–12 months",
+        "About 1 year",
+        "Over 2 years",
+        "Can't remember",
+      ],
+    },
   },
   { timestamps: true }
 );
