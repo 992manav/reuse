@@ -192,3 +192,45 @@
     margin: 0;
   }
 }
+.additem-full-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #e6fffa 0%, #bee3f8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Responsive styles for AddItem */
+@media (max-width: 900px) {
+  .add-item-container {
+    padding: 20px 8px;
+    max-width: 98vw;
+  }
+  .add-item-form {
+    gap: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .add-item-container {
+    padding: 8px 2vw;
+    border-radius: 8px;
+  }
+  .add-item-form {
+    gap: 6px;
+  }
+  .add-item-form input,
+  .add-item-form textarea,
+  .add-item-form select {
+    font-size: 0.95rem;
+    padding: 8px;
+  }
+  .images-list {
+    gap: 4px;
+  }
+  .image-preview {
+    width: 60px;
+    height: 60px;
+  }
+}

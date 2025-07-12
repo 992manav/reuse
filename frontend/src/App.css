@@ -1,0 +1,58 @@
+/* App-wide modern styles */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap");
+
+/* Full-page gradient background for all pages */
+body,
+html {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", Arial, sans-serif;
+  background: linear-gradient(135deg, #e6fffa 0%, #bee3f8 100%);
+}
+
+.app-bg-gradient {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e6fffa 0%, #bee3f8 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main-content {
+  flex: 1;
+  padding: 32px 0;
+  margin: 0 auto;
+}
+
+.fade-in {
+  animation: fadeIn 0.7s ease both;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add smooth transitions for all elements */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Responsive utility */
+@media (max-width: 800px) {
+  .app-main-content {
+    padding: 16px 0;
+    max-width: 98vw;
+  }
+}
+
+@media (max-width: 500px) {
+  .app-main-content {
+    padding: 4px 0;
+  }
+}

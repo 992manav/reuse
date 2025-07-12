@@ -17,15 +17,11 @@ export default function ItemDetail() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // Load current user from localStorage or elsewhere
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // Fetch item details
   useEffect(() => {
     async function fetchItem() {
       try {
@@ -41,7 +37,6 @@ export default function ItemDetail() {
     fetchItem();
   }, [id]);
 
-  // Fetch current user's approved items
   useEffect(() => {
     async function fetchUserItems() {
       if (!user) return;
@@ -60,10 +55,7 @@ export default function ItemDetail() {
   }, [user, id]);
 
   async function handleSwapRequest() {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    if (!user) return navigate("/login");
 
     let requestBody = { itemId: item.id, message };
 
@@ -83,13 +75,12 @@ export default function ItemDetail() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`, // Adjust if your backend expects a token
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify(requestBody),
       });
 
       if (!res.ok) throw new Error("Swap request failed");
-
       alert("Swap request sent successfully!");
       setShowSwapModal(false);
     } catch (error) {
@@ -98,9 +89,7 @@ export default function ItemDetail() {
     }
   }
 
-  if (loading) {
-    return <div className="item-detail-loading">Loading item...</div>;
-  }
+  if (loading) return <div className="item-detail-loading">Loading item...</div>;
 
   if (!item) {
     return (
@@ -120,6 +109,7 @@ export default function ItemDetail() {
       <Link to="/browse" className="item-detail-back">
         ← Back to browse
       </Link>
+
       <div className="item-detail-main">
         <div className="item-detail-gallery">
           <img
@@ -144,7 +134,9 @@ export default function ItemDetail() {
 
         <div className="item-detail-info">
           <h2>{item.title}</h2>
+          <div className="points-badge">★ {item.redeemPoints} points</div>
           <p>{item.description}</p>
+
           <div className="item-detail-tags">
             {item.tags.map((tag, idx) => (
               <span key={idx} className="item-detail-tag">
@@ -152,6 +144,18 @@ export default function ItemDetail() {
               </span>
             ))}
           </div>
+
+          <div className="item-owner-info">
+            <h4>Item Owner</h4>
+            <div className="owner-meta">
+              <div className="owner-avatar">{item.owner?.name?.[0] || "U"}</div>
+              <div className="owner-details">
+                <strong>{item.owner?.name || "Unknown Seller"}</strong>
+                <div className="owner-since">Listed on {new Date(item.createdAt).toLocaleDateString()}</div>
+              </div>
+            </div>
+          </div>
+
           {!isOwner && (
             <div className="item-detail-actions">
               <button

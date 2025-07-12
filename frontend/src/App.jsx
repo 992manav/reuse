@@ -15,27 +15,31 @@ import NotFound from "./components/NotFound";
 function App() {
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/browse" element={<BrowseItems />} />
-        <Route path="/list-item" element={<AddItem />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/item/:id" element={<ItemDetail />} />
+      <div className="app-bg-gradient">
+        <Navbar />
+        <main className="app-main-content">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/browse" element={<BrowseItems />} />
+            <Route path="/list-item" element={<AddItem />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/item/:id" element={<ItemDetail />} />
 
-        {/* Optional routes for future features */}
-        {/* <Route path="/profile" element={<Profile />} />
-        <Route path="/swaps" element={<MySwaps />} />
-        <Route path="/redeems" element={<MyRedeems />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} /> */}
+            {/* Optional routes for future features */}
+            {/* <Route path="/profile" element={<Profile />} />
+            <Route path="/swaps" element={<MySwaps />} />
+            <Route path="/redeems" element={<MyRedeems />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} /> */}
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
     </Router>
   );
 }

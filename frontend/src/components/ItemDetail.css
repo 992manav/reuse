@@ -1,273 +1,229 @@
-/* Improved & Responsive ItemDetail Component CSS */
+import React, { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import "./ItemDetail.css";
 
-.item-detail-container {
-  max-width: 1400px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: #ffffff;
-  border-radius: 1rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  animation: fadeInUp 0.5s ease;
-}
+export default function ItemDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-@keyframes fadeInUp {
-  0% {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
+  const [item, setItem] = useState(null);
+  const [userItems, setUserItems] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [showSwapModal, setShowSwapModal] = useState(false);
+  const [swapType, setSwapType] = useState("points");
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [pointsOffer, setPointsOffer] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
-.item-detail-back {
-  color: #38a169;
-  text-decoration: none;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  display: inline-block;
-  transition: color 0.2s;
-}
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
 
-.item-detail-back:hover {
-  color: #2f855a;
-}
+  useEffect(() => {
+    async function fetchItem() {
+      try {
+        const res = await fetch(`http://localhost:8080/api/items/${id}`);
+        const data = await res.json();
+        setItem(data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch item:", err);
+        setLoading(false);
+      }
+    }
+    fetchItem();
+  }, [id]);
 
-.item-detail-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
+  useEffect(() => {
+    async function fetchUserItems() {
+      if (!user) return;
+      try {
+        const res = await fetch("http://localhost:8080/api/items");
+        const data = await res.json();
+        const filtered = data.filter(
+          (i) => i.uploaderId === user.id && i.id !== id && i.approved
+        );
+        setUserItems(filtered);
+      } catch (err) {
+        console.error("Failed to fetch user items:", err);
+      }
+    }
+    fetchUserItems();
+  }, [user, id]);
 
-@media (min-width: 768px) {
-  .item-detail-main {
-    flex-direction: row;
-  }
-}
+  async function handleSwapRequest() {
+    if (!user) return navigate("/login");
 
-.item-detail-gallery {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+    let requestBody = { itemId: item.id, message };
 
-.item-detail-img {
-  width: 100%;
-  height: 600px;
-  object-fit: cover;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
+    if (swapType === "item" && selectedItemId) {
+      requestBody.offeredItemId = selectedItemId;
+    } else if (swapType === "points" && pointsOffer) {
+      const points = parseInt(pointsOffer);
+      if (points > user.points) {
+        alert("You don't have enough points for this offer.");
+        return;
+      }
+      requestBody.pointsOffered = points;
+    }
 
-.item-detail-img:hover {
-  transform: scale(1.02);
-}
+    try {
+      const res = await fetch("http://localhost:8080/api/swaps/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
 
-.item-detail-thumbs {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.item-detail-thumbs button {
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 6px;
-  overflow: hidden;
-  width: 60px;
-  height: 60px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-.item-detail-thumbs button.active {
-  outline: 3px solid #38a169;
-}
-
-.item-detail-thumbs button:hover {
-  transform: scale(1.05);
-}
-
-.item-detail-thumbs img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.item-detail-info {
-  flex: 1;
-}
-
-.item-detail-info h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin-bottom: 0.5rem;
-}
-
-.item-detail-info p {
-  color: #4a5568;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.item-detail-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.item-detail-tag {
-  background: #e6fffa;
-  color: #2c7a7b;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.9rem;
-  transition: background 0.2s;
-}
-
-.item-detail-tag:hover {
-  background: #b2f5ea;
-}
-
-.item-detail-actions {
-  margin-top: 1rem;
-}
-
-.item-detail-swap-btn {
-  background: #38a169;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.item-detail-swap-btn:hover {
-  background: #2f855a;
-}
-
-/* Modal */
-.item-detail-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.item-detail-modal-content {
-  background: #ffffff;
-  border-radius: 1rem;
-  padding: 2rem;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  animation: popIn 0.3s ease;
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.item-detail-modal-content select,
-.item-detail-modal-content input,
-.item-detail-modal-content textarea {
-  padding: 0.75rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
-  font-size: 1rem;
-  width: 100%;
-}
-
-.item-detail-modal-btn,
-.item-detail-modal-close {
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.item-detail-modal-btn {
-  background: #38a169;
-  color: #fff;
-}
-
-.item-detail-modal-btn:hover {
-  background: #2f855a;
-}
-
-.item-detail-modal-close {
-  background: #e53e3e;
-  color: #fff;
-}
-
-.item-detail-modal-close:hover {
-  background: #c53030;
-}
-
-.item-detail-notfound {
-  color: #e53e3e;
-  text-align: center;
-  margin-top: 3rem;
-  font-size: 1.2rem;
-  animation: fadeIn 0.4s ease;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 600px) {
-  .item-detail-img {
-    height: 300px;
+      if (!res.ok) throw new Error("Swap request failed");
+      alert("Swap request sent successfully!");
+      setShowSwapModal(false);
+    } catch (error) {
+      console.error("Swap request error:", error);
+      alert("Failed to send swap request");
+    }
   }
 
-  .item-detail-thumbs button {
-    width: 48px;
-    height: 48px;
+  if (loading) return <div className="item-detail-loading">Loading item...</div>;
+
+  if (!item) {
+    return (
+      <div className="item-detail-notfound">
+        <h2>Item not found</h2>
+        <Link to="/browse" className="item-detail-back">
+          ← Back to browse
+        </Link>
+      </div>
+    );
   }
 
-  .item-detail-info h2 {
-    font-size: 1.5rem;
-  }
+  const isOwner = user && user.id === item.uploaderId;
 
-  .item-detail-info p {
-    font-size: 1rem;
-  }
+  return (
+    <div className="item-detail-container">
+      <Link to="/browse" className="item-detail-back">
+        ← Back to browse
+      </Link>
 
-  .item-detail-modal-content {
-    padding: 1.5rem;
-  }
+      <div className="item-detail-main">
+        <div className="item-detail-gallery">
+          <img
+            src={item.images[selectedImage]}
+            alt={item.title}
+            className="item-detail-img"
+          />
+          {item.images.length > 1 && (
+            <div className="item-detail-thumbs">
+              {item.images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(index)}
+                  className={selectedImage === index ? "active" : ""}
+                >
+                  <img src={image} alt={`${item.title} ${index + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="item-detail-info">
+          <h2>{item.title}</h2>
+          <div className="points-badge">★ {item.redeemPoints} points</div>
+          <p>{item.description}</p>
+
+          <div className="item-detail-tags">
+            {item.tags.map((tag, idx) => (
+              <span key={idx} className="item-detail-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="item-owner-info">
+            <h4>Item Owner</h4>
+            <div className="owner-meta">
+              <div className="owner-avatar">{item.owner?.name?.[0] || "U"}</div>
+              <div className="owner-details">
+                <strong>{item.owner?.name || "Unknown Seller"}</strong>
+                <div className="owner-since">Listed on {new Date(item.createdAt).toLocaleDateString()}</div>
+              </div>
+            </div>
+          </div>
+
+          {!isOwner && (
+            <div className="item-detail-actions">
+              <button
+                onClick={() => setShowSwapModal(true)}
+                className="item-detail-swap-btn"
+              >
+                Request Swap
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showSwapModal && (
+        <div className="item-detail-modal">
+          <div className="item-detail-modal-content">
+            <h3>Request Swap</h3>
+            <select
+              value={swapType}
+              onChange={(e) => setSwapType(e.target.value)}
+            >
+              <option value="points">Offer Points</option>
+              <option value="item">Offer Item</option>
+            </select>
+
+            {swapType === "item" ? (
+              <select
+                value={selectedItemId}
+                onChange={(e) => setSelectedItemId(e.target.value)}
+              >
+                <option value="">Select your item</option>
+                {userItems.map((ui) => (
+                  <option key={ui.id} value={ui.id}>
+                    {ui.title}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="number"
+                placeholder="Points to offer"
+                value={pointsOffer}
+                onChange={(e) => setPointsOffer(e.target.value)}
+                min={0}
+              />
+            )}
+
+            <textarea
+              placeholder="Message (optional)"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+
+            <button
+              onClick={handleSwapRequest}
+              className="item-detail-modal-btn"
+            >
+              Send Request
+            </button>
+            <button
+              onClick={() => setShowSwapModal(false)}
+              className="item-detail-modal-close"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
