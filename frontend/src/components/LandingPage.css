@@ -1,3 +1,20 @@
+/* @media (max-width: 600px) {
+  .slider-items {
+    gap: 4px;
+  }
+  .slider-item-card {
+    width: 32vw;
+    min-width: 90px;
+    max-width: 33vw;
+    height: auto;
+  }
+  .slider-item-card img {
+    height: 70px;
+  }
+  .landing-featured-slider {
+    gap: 4px;
+  }
+} */
 /* LandingPage Component CSS */
 .landing-container {
   width: 100%;
@@ -10,19 +27,29 @@
   text-align: center;
 }
 .landing-hero-content h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #2d3748;
-  margin-bottom: 16px;
+  font-size: 5rem;
+  font-weight: 900;
+  color: #000000;
+  margin-bottom: 20px;
+  text-shadow: 1px 2px 8px #bee3f8, 0 2px 2px #38a16933;
 }
 .landing-hero-content h1 span {
-  color: #38a169;
+  color: #2aa12a;
   display: block;
+  font-size: 5rem;
+  font-weight: 900;
+  text-shadow: 1px 2px 8px #bee3f8, 0 2px 2px #38a16933;
 }
 .landing-hero-content p {
-  color: #718096;
-  font-size: 1.2rem;
-  margin-bottom: 32px;
+  color: #2d3748;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 36px;
+  text-shadow: 0 1px 4px #bee3f8;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .landing-hero-actions {
   display: flex;
@@ -31,22 +58,23 @@
 }
 .landing-hero-btn {
   background: #fff;
-  color: #38a169;
-  border: 2px solid #38a169;
-  border-radius: 8px;
-  padding: 16px 32px;
-  font-size: 1.1rem;
-  font-weight: bold;
+  color: #2aa12a;
+  border: 2px solid #2aa12a;
+  border-radius: 10px;
+  padding: 22px 48px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  box-shadow: 0 2px 8px #bee3f8;
   text-decoration: none;
-  transition: background 0.2s, color 0.2s;
 }
 .landing-hero-btn.green {
-  background: #38a169;
+  background: #2aa12a;
   color: #fff;
 }
 .landing-hero-btn:hover {
   background: #e6fffa;
   color: #2d3748;
+  text-decoration: none;
 }
 .landing-features {
   background: #fff;
@@ -105,45 +133,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 0 20px;
 }
 .slider-btn {
   background: #38a169;
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   font-size: 1.5rem;
   cursor: pointer;
+  transition: background 0.3s;
 }
+ .slider-btn:hover {
+   background: #2f855a;
+ }
 .slider-items {
   display: flex;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+  max-width: 1200px;
+  width: 100%;
 }
 .slider-item-card {
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   text-decoration: none;
   color: inherit;
   overflow: hidden;
-  width: 180px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: transform 0.2s ease-in-out;
 }
+ .slider-item-card:hover {
+   transform: translateY(-5px);
+ }
 .slider-item-card img {
   width: 100%;
-  height: 120px;
+  height: 500px;
   object-fit: cover;
   border-bottom: 1px solid #e2e8f0;
 }
 .slider-item-title {
   font-weight: bold;
   color: #2d3748;
-  font-size: 1rem;
-  margin: 8px 0;
+  font-size: 1.1rem;
+  margin: 12px 0;
 }
 .empty-list {
   color: #718096;
