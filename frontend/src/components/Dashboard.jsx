@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Dashboard.css";
 
@@ -12,8 +12,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (!token) {
+      console.warn("No token found. Redirecting to login.");
       setLoading(false);
+      navigate("/login");
       return;
     }
 
@@ -21,17 +24,28 @@ export default function Dashboard() {
 
     async function fetchData() {
       try {
+        console.log("Fetching dashboard data...");
+
+        // Use correct backend endpoints
         const [userRes, itemsRes, swapsRes] = await Promise.all([
-          axios.get("http://localhost:8080/api/users/me", { headers }),
-          axios.get("http://localhost:8080/api/items", { headers }),
-          axios.get("http://localhost:8080/api/swaps/my-swaps", { headers }),
+          axios.get("http://localhost:8080/api/users/profile/me", { headers }),
+          axios.get("http://localhost:8080/api/users/profile/items", {
+            headers,
+          }),
+          axios.get("http://localhost:8080/api/users/profile/swaps", {
+            headers,
+          }),
         ]);
+
+        console.log("User:", userRes.data);
+        console.log("Items:", itemsRes.data);
+        console.log("Swaps:", swapsRes.data);
 
         setUser(userRes.data);
         setItems(itemsRes.data);
         setSwaps(swapsRes.data);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching dashboard data:", err);
         navigate("/login");
       } finally {
         setLoading(false);
@@ -43,6 +57,7 @@ export default function Dashboard() {
 
   if (loading)
     return <div className="dashboard-loading">Loading dashboard...</div>;
+
   if (!user)
     return (
       <div className="dashboard-login">
@@ -65,13 +80,13 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Welcome back, {user.name}!</h1>
+        <h1>Welcome back, {user.name || "User"}!</h1>
         <p>Manage your sustainable wardrobe and track your swaps</p>
       </div>
 
       <div className="dashboard-stats">
         <div className="stat-card green">
-          <div className="stat-value">{user.points}</div>
+          <div className="stat-value">{user.points ?? 0}</div>
           <div className="stat-label">Points Balance</div>
         </div>
         <div className="stat-card blue">
@@ -123,7 +138,9 @@ export default function Dashboard() {
           userSwaps.map((swap) => (
             <div key={swap._id} className="dashboard-swap-card">
               <div className="dashboard-swap-status">{swap.status}</div>
-              <div className="dashboard-swap-message">{swap.message}</div>
+              <div className="dashboard-swap-message">
+                {swap.message || "No message"}
+              </div>
             </div>
           ))
         )}
