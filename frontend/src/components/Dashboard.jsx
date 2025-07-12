@@ -12,40 +12,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
-      console.warn("No token found. Redirecting to login.");
       setLoading(false);
       navigate("/login");
       return;
     }
 
     const headers = { Authorization: `Bearer ${token}` };
-
     async function fetchData() {
       try {
-        console.log("Fetching dashboard data...");
-
-        // Use correct backend endpoints
         const [userRes, itemsRes, swapsRes] = await Promise.all([
           axios.get("http://localhost:8080/api/users/profile/me", { headers }),
-          axios.get("http://localhost:8080/api/users/profile/items", {
-            headers,
-          }),
-          axios.get("http://localhost:8080/api/users/profile/swaps", {
-            headers,
-          }),
+          axios.get("http://localhost:8080/api/users/profile/items", { headers }),
+          axios.get("http://localhost:8080/api/users/profile/swaps", { headers }),
         ]);
-
-        console.log("User:", userRes.data);
-        console.log("Items:", itemsRes.data);
-        console.log("Swaps:", swapsRes.data);
 
         setUser(userRes.data);
         setItems(itemsRes.data);
         setSwaps(swapsRes.data);
       } catch (err) {
-        console.error("Error fetching dashboard data:", err);
+        console.error(err);
         navigate("/login");
       } finally {
         setLoading(false);
@@ -55,95 +41,96 @@ export default function Dashboard() {
     fetchData();
   }, [navigate]);
 
-  if (loading)
-    return <div className="dashboard-loading">Loading dashboard...</div>;
-
-  if (!user)
-    return (
-      <div className="dashboard-login">
-        Please log in to access your dashboard.
-      </div>
-    );
+  if (loading) return <div className="dashboard-loading">Loading...</div>;
 
   const userItems = items.filter((item) => item.uploader === user._id);
-  const userSwaps = swaps.filter(
-    (swap) =>
-      swap.requester === user._id ||
-      userItems.some((item) => item._id === swap.item)
-  );
-
-  const pendingApproval = userItems.filter((item) => !item.approved);
-  const completedSwaps = userSwaps.filter(
-    (swap) => swap.status === "completed"
-  );
+  const completedSwaps = swaps.filter((s) => s.status === "completed");
+  const pendingApproval = userItems.filter((i) => !i.approved);
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Welcome back, {user.name || "User"}!</h1>
-        <p>Manage your sustainable wardrobe and track your swaps</p>
-      </div>
+    <div className="dashboard-wrapper">
+      <div className="dashboard-grid">
+        {/* Left Panel */}
+        <div className="dashboard-left">
+          <div className="card profile-card">
+            <h3>Profile</h3>
+            <p className="username">{user.name}</p>
+            <p className="location">📍 {user.location}</p>
+            <p className="joined">Joined {new Date(user.createdAt).toLocaleDateString()}</p>
+          </div>
 
-      <div className="dashboard-stats">
-        <div className="stat-card green">
-          <div className="stat-value">{user.points ?? 0}</div>
-          <div className="stat-label">Points Balance</div>
+          <div className="card actions-card">
+            <h3>Quick Actions</h3>
+            <button className="action green" onClick={() => navigate("/add-item")}>＋ Add New Item</button>
+            <button className="action blue" onClick={() => navigate("/browse")}>🧺 Browse Items</button>
+          </div>
         </div>
-        <div className="stat-card blue">
-          <div className="stat-value">{userItems.length}</div>
-          <div className="stat-label">Items Listed</div>
-        </div>
-        <div className="stat-card purple">
-          <div className="stat-value">{completedSwaps.length}</div>
-          <div className="stat-label">Completed Swaps</div>
-        </div>
-        <div className="stat-card orange">
-          <div className="stat-value">{pendingApproval.length}</div>
-          <div className="stat-label">Pending Approval</div>
-        </div>
-      </div>
 
-      <div className="dashboard-profile">
-        {user.avatar && (
-          <img src={user.avatar} alt={user.name} className="dashboard-avatar" />
-        )}
-        <div className="dashboard-profile-info">
-          <h3>{user.name}</h3>
-          <p>{user.location}</p>
-        </div>
-      </div>
+        {/* Right Panel */}
+        <div className="dashboard-right">
+          <div className="header">
+            <h1>Welcome back, {user.name}!</h1>
+            <p>Manage your sustainable wardrobe and track your swaps</p>
+          </div>
 
-      <div className="dashboard-items">
-        <h2>Your Items</h2>
-        {userItems.length === 0 ? (
-          <div className="empty-list">No items listed yet.</div>
-        ) : (
-          userItems.map((item) => (
-            <div key={item._id} className="dashboard-item-card">
-              <div className="dashboard-item-title">{item.title}</div>
-              <div className="dashboard-item-desc">{item.description}</div>
-              <div className="dashboard-item-status">
-                {item.approved ? "Approved" : "Pending Approval"}
-              </div>
+          <div className="stats-grid">
+            <div className="stat-card green">
+              <div className="value">{user.points ?? 0}</div>
+              <div className="label">Points Balance</div>
             </div>
-          ))
-        )}
-      </div>
-
-      <div className="dashboard-swaps">
-        <h2>Your Swaps</h2>
-        {userSwaps.length === 0 ? (
-          <div className="empty-list">No swaps yet.</div>
-        ) : (
-          userSwaps.map((swap) => (
-            <div key={swap._id} className="dashboard-swap-card">
-              <div className="dashboard-swap-status">{swap.status}</div>
-              <div className="dashboard-swap-message">
-                {swap.message || "No message"}
-              </div>
+            <div className="stat-card blue">
+              <div className="value">{userItems.length}</div>
+              <div className="label">Items Listed</div>
             </div>
-          ))
-        )}
+            <div className="stat-card purple">
+              <div className="value">{completedSwaps.length}</div>
+              <div className="label">Completed Swaps</div>
+            </div>
+            <div className="stat-card orange">
+              <div className="value">{pendingApproval.length}</div>
+              <div className="label">Pending Approval</div>
+            </div>
+          </div>
+
+          <div className="card section">
+            <div className="section-header">
+              <h2>Your Items</h2>
+              <button onClick={() => navigate("/add-item")} className="link-btn">Add Item</button>
+            </div>
+            {userItems.length === 0 ? (
+              <div className="empty-box">
+                📦 No items listed yet<br />
+                <span className="link" onClick={() => navigate("/add-item")}>List your first item</span>
+              </div>
+            ) : (
+              <ul className="list">
+                {userItems.map((item) => (
+                  <li key={item._id}>
+                    <strong>{item.title}</strong> — {item.approved ? "Approved" : "Pending"}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="card section">
+            <h2>Recent Swaps</h2>
+            {swaps.length === 0 ? (
+              <div className="empty-box">
+                🔄 No swaps yet<br />
+                <span className="link" onClick={() => navigate("/browse")}>Start browsing items</span>
+              </div>
+            ) : (
+              <ul className="list">
+                {swaps.map((swap) => (
+                  <li key={swap._id}>
+                    <strong>{swap.status}</strong> — {swap.message || "No message"}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
