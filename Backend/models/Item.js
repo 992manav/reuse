@@ -10,6 +10,7 @@ const itemSchema = new mongoose.Schema(
     condition: String,
     tags: [String],
     images: [String],
+    redeemPoints: { type: Number, default: 20 },
     status: {
       type: String,
       enum: ["available", "swapped", "redeemed", "flagged"],
@@ -24,7 +25,12 @@ const itemSchema = new mongoose.Schema(
       default: null,
     },
 
-    purchasePrice: { type: Number },
+    approved: {
+      type: Boolean,
+      default: true,
+    },
+
+    purchasePrice: Number,
     purchaseAge: {
       type: String,
       enum: [

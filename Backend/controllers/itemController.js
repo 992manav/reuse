@@ -1,5 +1,6 @@
 import Item from "../models/Item.js";
 
+// CREATE a new item
 export const createItem = async (req, res) => {
   const {
     title,
@@ -9,10 +10,17 @@ export const createItem = async (req, res) => {
     size,
     condition,
     tags,
-    uploader,
+    images,
+    pointValue,
+    status,
+    purchasePrice,
+    purchaseAge,
   } = req.body;
 
   try {
+    const uploader = req.user?._id || req.body.uploader; // fallback
+    if (!uploader) return res.status(400).json({ message: "Missing uploader" });
+
     const item = new Item({
       title,
       description,
@@ -21,26 +29,35 @@ export const createItem = async (req, res) => {
       size,
       condition,
       tags,
+      images,
+      redeemPoints: pointValue || 20,
+      status: status || "available",
+      purchasePrice,
+      purchaseAge,
       uploader,
-      status: "available",
+      approved: true, // default: visible after creation
     });
 
     await item.save();
     res.status(201).json(item);
   } catch (err) {
+    console.error("Create item error:", err);
     res.status(500).json({ message: "Failed to create item", error: err });
   }
 };
 
+// GET all items
 export const getAllItems = async (req, res) => {
   try {
     const items = await Item.find();
     res.json(items);
   } catch (err) {
+    console.error("Error retrieving items:", err);
     res.status(500).json({ message: "Error retrieving items", error: err });
   }
 };
 
+// GET item by ID
 export const getItemById = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -52,6 +69,7 @@ export const getItemById = async (req, res) => {
   }
 };
 
+// UPDATE item by ID
 export const updateItem = async (req, res) => {
   try {
     const updated = await Item.findByIdAndUpdate(req.params.id, req.body, {
@@ -63,6 +81,7 @@ export const updateItem = async (req, res) => {
   }
 };
 
+// DELETE item
 export const deleteItem = async (req, res) => {
   try {
     await Item.findByIdAndDelete(req.params.id);
@@ -72,6 +91,7 @@ export const deleteItem = async (req, res) => {
   }
 };
 
+// FLAG an item
 export const flagItem = async (req, res) => {
   const itemId = req.params.id;
 
@@ -80,14 +100,16 @@ export const flagItem = async (req, res) => {
     if (!item) return res.status(404).json({ message: "Item not found" });
 
     if (item.isFlagged)
-      return res.status(400).json({ message: "Already flagged" });
+      return res.status(400).json({ message: "Item already flagged" });
+
+    const flaggedBy = req.user?._id || null;
 
     item.isFlagged = true;
     item.status = "flagged";
-    item.flaggedBy = req.user._id;
+    item.flaggedBy = flaggedBy;
 
     await item.save();
-    res.json({ message: "Item flagged by admin" });
+    res.json({ message: "Item flagged", item });
   } catch (err) {
     res.status(500).json({ message: "Error flagging item", error: err });
   }
