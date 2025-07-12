@@ -1,49 +1,54 @@
 /* AddItem Component CSS */
 .add-item-container {
-  max-width: 600px;
+  max-width: 650px;
   margin: 40px auto;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px #bee3f8;
+  padding: 40px;
 }
 .add-item-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 .add-item-form input,
 .add-item-form textarea,
 .add-item-form select {
-  padding: 8px;
+  padding: 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f7fafc;
 }
 .images-section {
-  margin-top: 12px;
+  margin-top: 16px;
 }
 .add-image-btn {
   background: #38a169;
   color: #fff;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.add-image-btn:hover {
+  background: #2aa12a;
 }
 .images-list {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .image-preview {
   position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px #bee3f8;
 }
 .image-preview img {
   width: 100%;
@@ -52,16 +57,19 @@
 }
 .remove-image-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 6px;
+  right: 6px;
   background: #e53e3e;
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  font-size: 1rem;
   cursor: pointer;
+}
+.remove-image-btn:hover {
+  background: #c53030;
 }
 .tags-section {
   margin-top: 12px;
@@ -111,4 +119,46 @@
 .submit-btn:disabled {
   background: #a0aec0;
   cursor: not-allowed;
+}
+.additem-full-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #e6fffa 0%, #bee3f8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Responsive styles for AddItem */
+@media (max-width: 900px) {
+  .add-item-container {
+    padding: 20px 8px;
+    max-width: 98vw;
+  }
+  .add-item-form {
+    gap: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .add-item-container {
+    padding: 8px 2vw;
+    border-radius: 8px;
+  }
+  .add-item-form {
+    gap: 6px;
+  }
+  .add-item-form input,
+  .add-item-form textarea,
+  .add-item-form select {
+    font-size: 0.95rem;
+    padding: 8px;
+  }
+  .images-list {
+    gap: 4px;
+  }
+  .image-preview {
+    width: 60px;
+    height: 60px;
+  }
 }
