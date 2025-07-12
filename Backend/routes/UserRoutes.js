@@ -5,10 +5,11 @@ import {
   getAllUsers,
 } from "../controllers/userController.js";
 
+import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
-router.get("/", getAllUsers);
-router.get("/:id", getUserById);
-router.put("/:id", updateUserById);
+router.get("/", verifyToken, isAdmin, getAllUsers);
+router.get("/:id", verifyToken, getUserById);
+router.put("/:id", verifyToken, updateUserById);
 
 export default router;
