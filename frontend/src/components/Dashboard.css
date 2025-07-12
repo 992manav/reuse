@@ -1,0 +1,131 @@
+/* Dashboard Component CSS */
+.dashboard-container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 32px;
+}
+.dashboard-header {
+  margin-bottom: 24px;
+}
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2d3748;
+}
+.dashboard-header p {
+  color: #718096;
+}
+.dashboard-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  flex: 1;
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-card.green {
+  border-left: 6px solid #38a169;
+}
+.stat-card.blue {
+  border-left: 6px solid #4299e1;
+}
+.stat-card.purple {
+  border-left: 6px solid #805ad5;
+}
+.stat-card.orange {
+  border-left: 6px solid #ed8936;
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2d3748;
+}
+.stat-label {
+  color: #718096;
+  font-size: 1rem;
+}
+.dashboard-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.dashboard-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.dashboard-profile-info h3 {
+  font-weight: bold;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+.dashboard-profile-info p {
+  color: #718096;
+  font-size: 0.95rem;
+}
+.dashboard-items,
+.dashboard-swaps {
+  margin-top: 32px;
+}
+.dashboard-items h2,
+.dashboard-swaps h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #2d3748;
+  margin-bottom: 12px;
+}
+.dashboard-item-card {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.dashboard-item-title {
+  font-weight: bold;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+.dashboard-item-desc {
+  color: #718096;
+  font-size: 0.95rem;
+}
+.dashboard-item-status {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: #805ad5;
+}
+.dashboard-swap-card {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.dashboard-swap-status {
+  font-weight: bold;
+  color: #38a169;
+  font-size: 1rem;
+}
+.dashboard-swap-message {
+  color: #718096;
+  font-size: 0.95rem;
+}
+.empty-list {
+  color: #718096;
+  text-align: center;
+  margin-top: 24px;
+}
+.dashboard-login {
+  color: #e53e3e;
+  text-align: center;
+  margin-top: 40px;
+  font-size: 1.2rem;
+}
