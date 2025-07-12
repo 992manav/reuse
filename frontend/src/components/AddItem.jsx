@@ -50,27 +50,11 @@ export default function AddItem() {
     "Can't remember",
   ];
 
-  const handleAddTag = () => {
-    const tag = newTag.trim();
-    if (tag && !formData.tags.includes(tag) && formData.tags.length < 10) {
-      setFormData({ ...formData, tags: [...formData.tags, tag] });
-      setNewTag("");
-    }
-  };
-
   const removeTag = (tagToRemove) => {
     setFormData({
       ...formData,
       tags: formData.tags.filter((tag) => tag !== tagToRemove),
     });
-  };
-
-  const handleAddImage = () => {
-    const img = newImage.trim();
-    if (img && !formData.images.includes(img) && formData.images.length < 5) {
-      setFormData({ ...formData, images: [...formData.images, img] });
-      setNewImage("");
-    }
   };
 
   const removeImage = (index) => {
@@ -80,21 +64,20 @@ export default function AddItem() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (formData.images.length === 0) {
-      alert("Please add at least one image URL");
+      alert("Please add at least one image link");
       return;
     }
-
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-
       const payload = {
         ...formData,
+        pointValue: formData.redeemPoints,
+        approved: false,
         uploader: user?._id,
       };
-
+      delete payload.redeemPoints;
       const res = await fetch("http://localhost:8080/api/items", {
         method: "POST",
         headers: {
@@ -103,9 +86,7 @@ export default function AddItem() {
         },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) throw new Error("Failed to add item");
-
       alert("Item submitted successfully!");
       navigate("/dashboard");
     } catch (err) {
@@ -213,13 +194,37 @@ export default function AddItem() {
         <div className="image-inputs">
           <input
             type="text"
-            placeholder="Image URL"
+            placeholder="Image Link (URL)"
             value={newImage}
             onChange={(e) => setNewImage(e.target.value)}
+            onBlur={() => {
+              const img = newImage.trim();
+              if (
+                img &&
+                !formData.images.includes(img) &&
+                formData.images.length < 5
+              ) {
+                setFormData({ ...formData, images: [...formData.images, img] });
+                setNewImage("");
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const img = newImage.trim();
+                if (
+                  img &&
+                  !formData.images.includes(img) &&
+                  formData.images.length < 5
+                ) {
+                  setFormData({
+                    ...formData,
+                    images: [...formData.images, img],
+                  });
+                  setNewImage("");
+                }
+              }
+            }}
           />
-          <button type="button" onClick={handleAddImage}>
-            Add Image
-          </button>
           <div className="images-preview">
             {formData.images.map((img, idx) => (
               <div key={idx} className="image-preview">
@@ -239,9 +244,6 @@ export default function AddItem() {
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
           />
-          <button type="button" onClick={handleAddTag}>
-            Add Tag
-          </button>
           <div className="tags-list">
             {formData.tags.map((tag, idx) => (
               <span key={idx} className="tag">
