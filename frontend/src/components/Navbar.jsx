@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
 import './Navbar.css';
 
 export default function Navbar() {
-  const { user, logout } = useApp();
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   function handleLogout() {
-    logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
     navigate('/');
   }
 
