@@ -1,34 +1,94 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-import './AdminPanel.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function AdminPanel() {
-  const { user, items, approveItem, rejectItem } = useApp();
+  const [user, setUser] = useState(null);
+  const [items, setItems] = useState([]);
+  const [selectedTab, setSelectedTab] = useState("pending");
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState('pending');
 
-  if (!user || !user.isAdmin) {
-    navigate('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-  const pendingItems = items.filter(item => !item.approved);
-  const approvedItems = items.filter(item => item.approved);
-  const allItems = items;
+    const fetchData = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
 
-  function getDisplayItems() {
+        const userRes = await axios.get("http://localhost:8080/api/users/me", {
+          headers,
+        });
+        setUser(userRes.data);
+
+        if (!userRes.data.isAdmin) {
+          navigate("/dashboard");
+          return;
+        }
+
+        const itemsRes = await axios.get("http://localhost:8080/api/items", {
+          headers,
+        });
+        setItems(itemsRes.data);
+      } catch (error) {
+        console.error("Error loading admin data:", error);
+        navigate("/login");
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  const approveItem = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/api/items/${id}/approve`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setItems((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, approved: true } : item
+        )
+      );
+    } catch (error) {
+      console.error("Error approving item:", error);
+    }
+  };
+
+  const rejectItem = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:8080/api/items/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setItems((prev) => prev.filter((item) => item._id !== id));
+    } catch (error) {
+      console.error("Error rejecting item:", error);
+    }
+  };
+
+  const pendingItems = items.filter((item) => !item.approved);
+  const approvedItems = items.filter((item) => item.approved);
+
+  const getDisplayItems = () => {
     switch (selectedTab) {
-      case 'pending':
+      case "pending":
         return pendingItems;
-      case 'approved':
+      case "approved":
         return approvedItems;
-      case 'all':
-        return allItems;
+      case "all":
+        return items;
       default:
         return pendingItems;
     }
-  }
+  };
 
   const displayItems = getDisplayItems();
 
@@ -48,20 +108,24 @@ export default function AdminPanel() {
           <div className="stat-label">Approved Items</div>
         </div>
         <div className="stat-card blue">
-          <div className="stat-value">{allItems.length}</div>
+          <div className="stat-value">{items.length}</div>
           <div className="stat-label">Total Items</div>
         </div>
       </div>
       <div className="admin-panel-tabs">
         {[
-          { key: 'pending', label: 'Pending Approval', count: pendingItems.length },
-          { key: 'approved', label: 'Approved', count: approvedItems.length },
-          { key: 'all', label: 'All Items', count: allItems.length }
-        ].map(tab => (
+          {
+            key: "pending",
+            label: "Pending Approval",
+            count: pendingItems.length,
+          },
+          { key: "approved", label: "Approved", count: approvedItems.length },
+          { key: "all", label: "All Items", count: items.length },
+        ].map((tab) => (
           <button
             key={tab.key}
             onClick={() => setSelectedTab(tab.key)}
-            className={selectedTab === tab.key ? 'active' : ''}
+            className={selectedTab === tab.key ? "active" : ""}
           >
             {tab.label} ({tab.count})
           </button>
@@ -71,20 +135,31 @@ export default function AdminPanel() {
         {displayItems.length === 0 ? (
           <div className="empty-list">No items to display.</div>
         ) : (
-          displayItems.map(item => (
-            <div key={item.id} className="admin-item-card">
+          displayItems.map((item) => (
+            <div key={item._id} className="admin-item-card">
               <div className="admin-item-info">
                 <div className="admin-item-title">{item.title}</div>
                 <div className="admin-item-desc">{item.description}</div>
               </div>
               <div className="admin-item-actions">
-                {!item.approved && (
+                {!item.approved ? (
                   <>
-                    <button onClick={() => approveItem(item.id)} className="approve-btn">Approve</button>
-                    <button onClick={() => rejectItem(item.id)} className="reject-btn">Reject</button>
+                    <button
+                      onClick={() => approveItem(item._id)}
+                      className="approve-btn"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => rejectItem(item._id)}
+                      className="reject-btn"
+                    >
+                      Reject
+                    </button>
                   </>
+                ) : (
+                  <span className="approved-label">Approved</span>
                 )}
-                {item.approved && <span className="approved-label">Approved</span>}
               </div>
             </div>
           ))

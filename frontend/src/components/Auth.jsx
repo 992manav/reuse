@@ -1,67 +1,116 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Auth.css';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import jwt_decode from "jwt-decode";
+import "./Auth.css";
 
 export default function AuthForm({ type }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
+  const isLogin = type === "login";
+  const [formData, setFormData] = useState({
+    name: "",
+    location: "",
+    email: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
+
+    const url = isLogin
+      ? "http://localhost:8080/api/auth/login"
+      : "http://localhost:8080/api/auth/register";
+    const payload = isLogin
+      ? { email: formData.email, password: formData.password }
+      : {
+          name: formData.name,
+          location: formData.location,
+          email: formData.email,
+          password: formData.password,
+        };
 
     try {
-      const url = type === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const body = type === 'login'
-        ? { email, password }
-        : { email, password, name, location };
-
       const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || 'Invalid credentials. Try user@example.com / password');
+        setError(data.message || "Authentication failed.");
         return;
       }
 
-      // Store token and user info
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      navigate('/dashboard');
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/dashboard");
     } catch (err) {
-      console.error('Auth error:', err);
-      setError('An error occurred. Please try again.');
+      console.error("Auth error:", err);
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("http://localhost:8080/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Google login failed");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("Google login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="auth-container">
       <div className="auth-header">
-        <Link to="/" className="auth-logo">ReWear</Link>
-        <h2>{type === 'login' ? 'Sign in to your account' : 'Create your account'}</h2>
+        <Link to="/" className="auth-logo">
+          ReWear
+        </Link>
+        <h2>{isLogin ? "Sign In" : "Create Your Account"}</h2>
         <p>
-          {type === 'login' ? (
+          {isLogin ? (
             <>
-              Don't have an account? <Link to="/signup" className="auth-link">Sign up</Link>
+              Don’t have an account?{" "}
+              <Link to="/signup" className="auth-link">
+                Sign up
+              </Link>
             </>
           ) : (
             <>
-              Already have an account? <Link to="/login" className="auth-link">Sign in</Link>
+              Already have an account?{" "}
+              <Link to="/login" className="auth-link">
+                Sign in
+              </Link>
             </>
           )}
         </p>
@@ -69,47 +118,58 @@ export default function AuthForm({ type }) {
 
       <div className="auth-form-wrapper">
         {error && <div className="auth-error">{error}</div>}
-        {type === 'login' && (
-          <div className="auth-demo">Demo credentials: user@example.com / password</div>
-        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          {type === 'signup' && (
+          {!isLogin && (
             <>
               <input
                 type="text"
+                name="name"
                 placeholder="Full Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
+                value={formData.name}
+                onChange={handleChange}
                 required
               />
               <input
                 type="text"
+                name="location"
                 placeholder="Location"
-                value={location}
-                onChange={e => setLocation(e.target.value)}
+                value={formData.location}
+                onChange={handleChange}
                 required
               />
             </>
           )}
+
           <input
             type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
             required
           />
           <input
             type="password"
+            name="password"
             placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             required
           />
+
           <button type="submit" disabled={loading} className="auth-submit-btn">
-            {loading ? 'Loading...' : type === 'login' ? 'Sign In' : 'Sign Up'}
+            {loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
           </button>
         </form>
+
+        <div className="google-login-wrapper">
+          <p style={{ textAlign: "center", margin: "1rem 0" }}>or</p>
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => setError("Google login failed")}
+          />
+        </div>
       </div>
     </div>
   );

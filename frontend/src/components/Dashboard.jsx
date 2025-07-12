@@ -1,48 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Dashboard.css';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./Dashboard.css";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
   const [swaps, setSwaps] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
       setLoading(false);
       return;
     }
 
+    const headers = { Authorization: `Bearer ${token}` };
+
     async function fetchData() {
       try {
-        const headers = { Authorization: `Bearer ${token}` };
-
         const [userRes, itemsRes, swapsRes] = await Promise.all([
-          fetch('/api/users/me', { headers }),
-          fetch('/api/items', { headers }),
-          fetch('/api/swaps/my-swaps', { headers }),
+          axios.get("http://localhost:8080/api/users/me", { headers }),
+          axios.get("http://localhost:8080/api/items", { headers }),
+          axios.get("http://localhost:8080/api/swaps/my-swaps", { headers }),
         ]);
 
-        if (!userRes.ok || !itemsRes.ok || !swapsRes.ok) {
-          throw new Error('Failed to load dashboard data');
-        }
-
-        const [userData, itemsData, swapsData] = await Promise.all([
-          userRes.json(),
-          itemsRes.json(),
-          swapsRes.json(),
-        ]);
-
-        setUser(userData);
-        setItems(itemsData);
-        setSwaps(swapsData);
+        setUser(userRes.data);
+        setItems(itemsRes.data);
+        setSwaps(swapsRes.data);
       } catch (err) {
         console.error(err);
-        navigate('/login');
+        navigate("/login");
       } finally {
         setLoading(false);
       }
@@ -51,17 +41,26 @@ export default function Dashboard() {
     fetchData();
   }, [navigate]);
 
-  if (loading) return <div className="dashboard-loading">Loading dashboard...</div>;
-  if (!user) return <div className="dashboard-login">Please log in to access your dashboard.</div>;
+  if (loading)
+    return <div className="dashboard-loading">Loading dashboard...</div>;
+  if (!user)
+    return (
+      <div className="dashboard-login">
+        Please log in to access your dashboard.
+      </div>
+    );
 
-  const userItems = items.filter(item => item.uploaderId === user.id);
-  const userSwaps = swaps.filter(request =>
-    request.requesterId === user.id ||
-    items.some(item => item.id === request.itemId && item.uploaderId === user.id)
+  const userItems = items.filter((item) => item.uploader === user._id);
+  const userSwaps = swaps.filter(
+    (swap) =>
+      swap.requester === user._id ||
+      userItems.some((item) => item._id === swap.item)
   );
 
-  const pendingApproval = userItems.filter(item => !item.approved);
-  const completedSwaps = userSwaps.filter(swap => swap.status === 'completed');
+  const pendingApproval = userItems.filter((item) => !item.approved);
+  const completedSwaps = userSwaps.filter(
+    (swap) => swap.status === "completed"
+  );
 
   return (
     <div className="dashboard-container">
@@ -90,7 +89,9 @@ export default function Dashboard() {
       </div>
 
       <div className="dashboard-profile">
-        {user.avatar && <img src={user.avatar} alt={user.name} className="dashboard-avatar" />}
+        {user.avatar && (
+          <img src={user.avatar} alt={user.name} className="dashboard-avatar" />
+        )}
         <div className="dashboard-profile-info">
           <h3>{user.name}</h3>
           <p>{user.location}</p>
@@ -102,12 +103,12 @@ export default function Dashboard() {
         {userItems.length === 0 ? (
           <div className="empty-list">No items listed yet.</div>
         ) : (
-          userItems.map(item => (
-            <div key={item.id} className="dashboard-item-card">
+          userItems.map((item) => (
+            <div key={item._id} className="dashboard-item-card">
               <div className="dashboard-item-title">{item.title}</div>
               <div className="dashboard-item-desc">{item.description}</div>
               <div className="dashboard-item-status">
-                {item.approved ? 'Approved' : 'Pending Approval'}
+                {item.approved ? "Approved" : "Pending Approval"}
               </div>
             </div>
           ))
@@ -119,8 +120,8 @@ export default function Dashboard() {
         {userSwaps.length === 0 ? (
           <div className="empty-list">No swaps yet.</div>
         ) : (
-          userSwaps.map(swap => (
-            <div key={swap.id} className="dashboard-swap-card">
+          userSwaps.map((swap) => (
+            <div key={swap._id} className="dashboard-swap-card">
               <div className="dashboard-swap-status">{swap.status}</div>
               <div className="dashboard-swap-message">{swap.message}</div>
             </div>
